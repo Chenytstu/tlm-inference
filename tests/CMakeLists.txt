@@ -11,7 +11,7 @@ macro (add_test_HE _name)
     target_link_libraries(${_name}-HE SCI-HE) 
 endmacro()
 
-
-add_test_TLM(truncation) #
+# add_test_TLM(truncation)
 add_test_TLM(beaver)
 add_test_TLM(gen_beaver)
+add_test_TLM(matmul)

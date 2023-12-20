@@ -68,7 +68,8 @@
         "cfenv": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "alignedvector3": "cpp"
     },
     "cmake.configureOnOpen": false
 }

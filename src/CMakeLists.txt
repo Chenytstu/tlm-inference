@@ -109,10 +109,10 @@ install(DIRECTORY
 
 install(FILES
         "defines.h"
-        # "defines_uniform.h"
+        "defines_uniform.h"
         "globals.h"
         "library_fixed.h"
-        # "library_fixed_uniform.h"
+        "library_fixed_uniform.h"
         # "cleartext_library_fixed.h"
         # "cleartext_library_fixed_uniform.h"
         DESTINATION include)

@@ -15,8 +15,7 @@ public:
     int party;
     sci::IOPack *iopack;
     LinearBeaver *linear;
-    std::random_device rd;
-    std::uniform_int_distribution<> dist(0, 100);
+    PRG128 prg;
 
     NonLinear(int party_, sci::IOPack *iopack_) : iopack(iopack_) {
         assert(party_ == sci::PUBLIC || party_ == sci::ALICE || party_ == sci::BOB);
@@ -38,8 +37,6 @@ public:
         if (party == sci::ALICE) {
         }
     }
-
-    
 
     uint64_t *inverse_square(uint64_t *input, size_t size, unsigned int iter = 14) {
         return nullptr
