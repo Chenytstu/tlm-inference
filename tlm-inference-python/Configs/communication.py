@@ -1,0 +1,13 @@
+buffer = 4096
+default_host = '127.0.0.1'
+default_port_1 = 53424
+default_port_2 = 34000
+default_port = default_port_1
+local_latency_in_s = 0.001
+LOG = False
+MAX_LISTEN = 5
+recv_timeout_in_s = 0.3
+MAX_Connection_Time = 20
+connection_interval_in_s = 3
+default_filepath = './Assets/'
+protocol = 0
