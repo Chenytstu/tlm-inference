@@ -30,7 +30,7 @@ def send(data, addr=config.default_host, port=config.default_port, LOG=config.LO
             time.sleep(config.connection_interval_in_s)
             s.close()
             if i == config.MAX_Connection_Time - 1:
-                raise Exception(f'[ERROR] Connection failed after {config.MAX_Connection_Time} times.')
+                raise Exception(f'[ERROR] Connection failed after {config.MAX_Connection_Time} times.\n' + e)
             s = socket(AF_INET, SOCK_STREAM)
             if LOG:
                 print(f"[WARNING] Re-try to connect {addr}:{port}")
@@ -44,6 +44,7 @@ def send(data, addr=config.default_host, port=config.default_port, LOG=config.LO
     if LOG:
         print(f"[INFO] Data Sent to {addr}:{port}, size: {sys.getsizeof(data)}, time: {time.time() - start}")
     s.close()
+    print("send")
     return sys.getsizeof(data)
 
 def recv(addr=config.default_host, port=config.default_port, LOG=config.LOG):
@@ -53,6 +54,7 @@ def recv(addr=config.default_host, port=config.default_port, LOG=config.LOG):
         s.bind((addr, port))
         s.listen(10)
     except ConnectionRefusedError as e:
+        s.close()
         print(e)
         sys.exit(1)
     if LOG:
@@ -66,6 +68,9 @@ def recv(addr=config.default_host, port=config.default_port, LOG=config.LOG):
         data += packet
     if LOG:
         print(f"[INFO] Data received from {addr}:{port}, size: {sys.getsizeof(data)}")
+    s.close()
+    comm.close()
+    print("recv")
     return unpack(data)
 
 if __name__ == "__main__":
