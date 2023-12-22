@@ -4,12 +4,13 @@ from PrivLayer import *
 from NonLinear.NonLinear import NonLinear
 
 class LayerNorm(Layer):
-    def __init__(self, party, input, gamma=1, beta=0) -> None:
-        super().__init__(party, input)
+    def __init__(self, party, gamma=1, beta=0, port_offset=0) -> None:
+        super().__init__(party)
         self.gamma = gamma
         self.beta = beta
-        self.a, self.b, self.c = load_parm("Layer/data/LayerNorm_parm" + str(party))
+        self.a, self.b, self.c = load_parm("Layer/data/LayerNorm_parm" + str(party) + ".dat")
+        self.port_offset = port_offset
         
-    def forward(self):
-        return np.asarray([self.nonLinear.layerNorm(i, self.a, self.b, self.c, self.gamma, self.beta) for i in self.inp], 
+    def forward(self, inp):
+        return np.asarray([self.nonLinear.layerNorm(i, self.a, self.b, self.c, self.gamma, self.beta, self.port_offset) for i in inp], 
                           dtype=object)

@@ -26,12 +26,11 @@ def load_parm(path: str):
     return np.asarray(data, dtype=object)
 
 class Layer:
-    def __init__(self, party, inp) -> None:
+    def __init__(self, party) -> None:
         assert party == Alice or party == Bob
         self.party = party
-        self.inp = inp
         self.mult = Mult(party)
         self.nonLinear = NonLinear(party)
     
-    def forward(self):
+    def forward(self, inp):
         pass

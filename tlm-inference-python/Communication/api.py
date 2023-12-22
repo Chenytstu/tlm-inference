@@ -44,7 +44,6 @@ def send(data, addr=config.default_host, port=config.default_port, LOG=config.LO
     if LOG:
         print(f"[INFO] Data Sent to {addr}:{port}, size: {sys.getsizeof(data)}, time: {time.time() - start}")
     s.close()
-    print(sys.getsizeof(data))
     return sys.getsizeof(data)
 
 def recv(addr=config.default_host, port=config.default_port, LOG=config.LOG):

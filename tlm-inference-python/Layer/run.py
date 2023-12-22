@@ -1,25 +1,21 @@
 import sys
 sys.path.append("/root/TLM-inference/tlm-inference-python")
 
-import numpy as np
-
+from Layer.PrivLayer import *
 from Layer.PrivDecoderLayer import DecoderLayer
 from Configs.constant import *
 from Configs.model import *
 
 if __name__ == "__main__":
     party = int(sys.argv[1])
-    inp = []
-    for i in np.random.uniform(-1, 1, (input_size, batch_size)):
-        tmp = []
-        for j in i:
-            tmp.append(famefrac(j))
-        inp.append(tmp)
-    inp = np.asarray(inp, dtype=object)
-    import time
+    inp = load_mat("Layer/input.dat")
     
-    layer = DecoderLayer(party, inp)
+    import time
     start = time.time()
-    _forward = layer.forward()
+    layer = DecoderLayer(party)
     end = time.time() - start
+    print("parm loaded, time:", end)
+    _forward = layer.forward(inp)
+    # print(_forward.shape)
+    # show(_forward)
     

@@ -10,30 +10,30 @@ class Mult:
         assert(party == Alice or party == Bob)
         self._party = party
         
-    def hadamard_product(self, x, y, a, b, c):
-        s = x - a;
-        t = y - b;
+    def hadamard_product(self, x, y, a, b, c, port_offset=0):
+        s = x - a
+        t = y - b
         s_remote = None
         t_remote = None
         if self._party == Alice:
-            send((s, t), port=config.default_port_1)
+            send((s, t), port=config.default_port_1 + port_offset)
         else: 
-            s_remote, t_remote = recv(port=config.default_port_1)
+            s_remote, t_remote = recv(port=config.default_port_1 + port_offset)
             s += s_remote
             t += t_remote
             s_remote = s
             t_remote = t
-            send((s, t), port=config.default_port_2)
+            send((s, t), port=config.default_port_2 + port_offset)
             return s_remote * b + t_remote * a + c
-        s_remote, t_remote = recv(port=config.default_port_2)
+        s_remote, t_remote = recv(port=config.default_port_2 + port_offset)
         s = s_remote
         t = t_remote
         return s_remote * b + t_remote * a + c + s * t
     
-    def vector_multipication(self, x, y, a, b, c):
-        return self.hadamard_product(x, y, a, b, c)
+    def vector_multipication(self, x, y, a, b, c, port_offset=0):
+        return self.hadamard_product(x, y, a, b, c, port_offset)
     
-    def matrix_multipication(self, x, y, a, b, c):
+    def matrix_multipication(self, x, y, a, b, c, port_offset=0):
         s = x.copy()
         t = y.transpose().copy()
         for i in range(len(s)):
@@ -43,14 +43,14 @@ class Mult:
         s_remote = None
         t_remote = None
         if self._party == Alice:
-            send((s, t), port=config.default_port_1)
+            send((s, t), port=config.default_port_1 + port_offset)
         else:
-            s_remote, t_remote = recv(port=config.default_port_1)
+            s_remote, t_remote = recv(port=config.default_port_1 + port_offset)
             s += s_remote
             t += t_remote
             s_remote = s
             t_remote = t
-            send((s, t), port=config.default_port_2,)
+            send((s, t), port=config.default_port_2 + port_offset)
             dim1, _ = s.shape
             dim2, _ = t.shape
             z = []
@@ -61,7 +61,7 @@ class Mult:
                     tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + c * _))
                 z.append(tmp)
             return np.asarray(z, dtype=object)
-        s_remote, t_remote = recv(port=config.default_port_2)
+        s_remote, t_remote = recv(port=config.default_port_2 + port_offset)
         s = s_remote
         t = t_remote
         dim1, _ = s.shape

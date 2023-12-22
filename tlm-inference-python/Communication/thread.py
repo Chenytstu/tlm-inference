@@ -1,7 +1,8 @@
 from threading import Thread
 
 class TLM_Thread(Thread):
-    def __init__(self, func: function, *args):
+    def __init__(self, func, *args):
+        super().__init__()
         self.__result = None;
         self.func = func
         self.args = args
@@ -19,22 +20,20 @@ class TLM_Thread(Thread):
         self.__result = self.func(*self.args)
         
 class TLM_ThreadFactory():
-    def __init__(self):
-        self.threads = []
+    def __init__(self, threads):
+        self.threads = threads
         
     def append(self, thread: TLM_Thread):
         self.threads.append(thread)
         
     def excute(self):
         for thread in self.threads:
-            thread.strat()
+            thread.start()
         for thread in self.threads:
             thread.join()
             
-    def get_thread_result(self, func):
-        for thread in self.threads:
-            if thread.func == func:
-                return thread.get_result()
+    def get_thread_result(self, index: int):
+        return self.threads[index].get_result()
             
     def get(self, index: int):
         return self.threads[index]

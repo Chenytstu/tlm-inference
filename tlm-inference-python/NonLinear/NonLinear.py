@@ -1,3 +1,6 @@
+import sys
+sys.path.append("/root/TLM-inference/tlm-inference-python")
+
 import math
 import numpy as np
 
@@ -47,54 +50,54 @@ class NonLinear:
         self._party = party
         self._mult = Mult(party)
         
-    def mul2add(self, x, rand1, rand2):
+    def mul2add(self, x, rand1, rand2, port_offset=0):
         if (self._party == Alice):
             mask_x = x * rand1
-            send(mask_x, port=config.default_port_1)
+            send(mask_x, port=config.default_port_1 + port_offset)
         else:
             mask_x = x * rand2
-            mask_x_remote = recv(port=config.default_port_1)
-            send(mask_x, port=config.default_port_2)
+            mask_x_remote = recv(port=config.default_port_1 + port_offset)
+            send(mask_x, port=config.default_port_2 + port_offset)
             result = mask_x_remote * rand1 * x
             return result
-        mask_x_remote = recv(port=config.default_port_2)
+        mask_x_remote = recv(port=config.default_port_2 + port_offset)
         result = mask_x_remote * rand2 * x
         return result
     
-    def inverse_square(self, x, a, b, c, iter: int=10):
+    def inverse_square(self, x, a, b, c, iter: int=10, port_offset=0):
         rand = np.random.uniform(np.sqrt(.5), np.sqrt(2))
         inverse = None
         if self._party == Alice:
-            send(rand * x, port=config.default_port_1)
-            inverse = recv(port=config.default_port_2)
+            send(rand * x, port=config.default_port_1 + port_offset)
+            inverse = recv(port=config.default_port_2 + port_offset)
         else:
-            remote = recv(port=config.default_port_1)
+            remote = recv(port=config.default_port_1 + port_offset)
             alpha = int(x * rand + remote)
             inverse_ = math.pow(2, (int) (alpha / -2))
             inverse = famefrac(np.random.uniform(0, inverse_))
-            send(inverse_ - inverse, port=config.default_port_2)
+            send(inverse_ - inverse, port=config.default_port_2 + port_offset)
         tmp = inverse
         for _ in range(iter):
             tmp1 = tmp
             
-            inverse2 = self._mult.vector_multipication(inverse, inverse, a, b, c)
-            iter_ = self._mult.vector_multipication(x, inverse2, a, b, c)
-            iter__ = self._mult.vector_multipication(inverse, iter_ * -1 + 1.5, a, b, c)
+            inverse2 = self._mult.vector_multipication(inverse, inverse, a, b, c, port_offset)
+            iter_ = self._mult.vector_multipication(x, inverse2, a, b, c, port_offset)
+            iter__ = self._mult.vector_multipication(inverse, iter_ * -1 + 1.5, a, b, c, port_offset)
             tmp = iter__ * .5
             
             inverse = tmp1
         return inverse
     
-    def layerNorm(self, x, a, b, c, gamma=1, beta=0, iter: int=10):
+    def layerNorm(self, x, a, b, c, gamma=1, beta=0, iter: int=10, port_offset=0):
         avg = x.sum() / len(x)
         sigma = x - avg
-        var_ = self._mult.vector_multipication(sigma, sigma, a, b, c)
+        var_ = self._mult.vector_multipication(sigma, sigma, a, b, c, port_offset)
         var = var_.sum() / len(var_)
         inverse_var = self.inverse_square(var, a, b, c, iter)
-        norm = self._mult.vector_multipication(sigma, inverse_var, a, b, c)
+        norm = self._mult.vector_multipication(sigma, inverse_var, a, b, c, port_offset)
         return norm * gamma + beta
         
-    def softmax(self, x, rand1, rand2):
+    def softmax(self, x, rand1, rand2, port_offset=0):
         rand = famefrac(np.random.uniform(0, 1))
         exp_x = []
         max_ = x[0]
@@ -104,20 +107,20 @@ class NonLinear:
         for i in x - max_:
             exp_x.append(i.exp() * rand)
         exp_x = np.asarray(exp_x, dtype=object)
-        exp_x_addshare = self.mul2add(exp_x, rand1, rand2)
+        exp_x_addshare = self.mul2add(exp_x, rand1, rand2, port_offset)
         sum_ = exp_x_addshare.sum()
         sum_remote = None
         if (self._party == Alice):
-            send(sum_, port=config.default_port_1)
-            sum_remote = recv(port=config.default_port_2)
+            send(sum_, port=config.default_port_1 + port_offset)
+            sum_remote = recv(port=config.default_port_2 + port_offset)
         else:
-            sum_remote = recv(port=config.default_port_1)
-            send(sum_, port=config.default_port_2)
+            sum_remote = recv(port=config.default_port_1 + port_offset)
+            send(sum_, port=config.default_port_2 + port_offset)
         return exp_x_addshare / (sum_ + sum_remote)
     
-    def gelu(self, x, a, b, c, rand1, rand2):
-        x2 = self._mult.vector_multipication(x, x, a, b, c)
-        x3 = self._mult.vector_multipication(x, x2, a, b, c)
+    def gelu(self, x, a, b, c, rand1, rand2, port_offset=0):
+        x2 = self._mult.vector_multipication(x, x, a, b, c, port_offset)
+        x3 = self._mult.vector_multipication(x, x2, a, b, c, port_offset)
         alpha =  (x + x3 * 0.0044715) * famcfrac(math.sqrt(2. / math.pi) * 2)
         rand = famefrac(np.random.uniform(0, 1))
         rand = famefrac(1)
@@ -125,20 +128,20 @@ class NonLinear:
         for i in alpha:
             theta.append(i.exp() * rand)
         theta = np.asarray(theta, dtype=object)
-        rand_addshare = self.mul2add(rand, rand1, rand2)
-        theta_addshare = self.mul2add(theta, rand1, rand2)
+        rand_addshare = self.mul2add(rand, rand1, rand2, port_offset)
+        theta_addshare = self.mul2add(theta, rand1, rand2, port_offset)
         omega_local = theta_addshare + rand_addshare
         if self._party == Alice:
-            send(omega_local, port=config.default_port_1)
+            send(omega_local, port=config.default_port_1 + port_offset)
         else:
-            omega_remote = recv(port=config.default_port_1)
+            omega_remote = recv(port=config.default_port_1 + port_offset)
             omega = omega_local + omega_remote
-            send(omega, port=config.default_port_2)
+            send(omega, port=config.default_port_2 + port_offset)
             beta = (theta_addshare - rand_addshare) / omega + .5
-            return self._mult.vector_multipication(beta, x, a, b, c) * .5
-        omega_remote = recv(port=config.default_port_2)
+            return self._mult.vector_multipication(beta, x, a, b, c, port_offset) * .5
+        omega_remote = recv(port=config.default_port_2 + port_offset)
         beta = (theta_addshare - rand_addshare) / omega_remote + .5
-        return self._mult.vector_multipication(beta, x, a, b, c) * .5
+        return self._mult.vector_multipication(beta, x, a, b, c, port_offset) * .5
         
 
 def real_softmax(x):
@@ -181,6 +184,9 @@ if __name__ == "__main__":
     x = np.asarray(x, dtype=object)
     party = int(sys.argv[1])
     non_linear = NonLinear(party)
+    import time
+
+
     # if (party == Alice):
     #     send((mask[0][1], mask[1][1]))
     #     res = non_linear.mul2add(x, mask[0][0], mask[1][0])
@@ -220,7 +226,10 @@ if __name__ == "__main__":
     sigma = x - avg
     var_ = sigma * sigma
     var = sum(var_) / len(var_)
+    # start = time.time()
     non_linear.inverse_square(var, 1, 1, 2)
+    # end = time.time() - start
+    # print(end)
     # if (party == Alice):
     #     res_iq = non_linear.inverse_square(var, 1, 1, 2)
     #     res_ln = non_linear.layerNorm(x, 1, 1, 2)

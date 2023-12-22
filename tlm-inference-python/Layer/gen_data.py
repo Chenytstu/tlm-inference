@@ -17,12 +17,19 @@ def write(mat, path):
         
 
 if __name__ == "__main__":
-    # write(np.random.uniform(-1, 1, (d_module, d_module)), "./Layer/data/FFN_W11")
-    # write(np.random.uniform(-1, 1, (d_module, d_module)), "./Layer/data/FFN_W12")
-    # write(np.random.uniform(-1, 1, (d_module, d_module)), "./Layer/data/FFN_W21")
-    # write(np.random.uniform(-1, 1, (d_module, d_module)), "./Layer/data/FFN_W22")
-    write(np.random.uniform(-1, 1, (1, d_module)), "./Layer/data/FFN_b11")
-    write(np.random.uniform(-1, 1, (1, d_module)), "./Layer/data/FFN_b12")
-    write(np.random.uniform(-1, 1, (1, d_module)), "./Layer/data/FFN_b21")
-    write(np.random.uniform(-1, 1, (1, d_module)), "./Layer/data/FFN_b22")
+    write(np.random.uniform(-.1, .1, (inp_seq_length, d_module)), "./Layer/data/Attention_WQ1.dat")
+    write(np.random.uniform(-.1, .1, (inp_seq_length, d_module)), "./Layer/data/Attention_WQ2.dat")
+    write(np.random.uniform(-.1, .1, (inp_seq_length, d_module)), "./Layer/data/Attention_WK1.dat")
+    write(np.random.uniform(-.1, .1, (inp_seq_length, d_module)), "./Layer/data/Attention_WK2.dat")
+    write(np.random.uniform(-.1, .1, (inp_seq_length, d_module)), "./Layer/data/Attention_WV1.dat")
+    write(np.random.uniform(-.1, .1, (inp_seq_length, d_module)), "./Layer/data/Attention_WV2.dat")
+    write(np.random.uniform(-.1, .1, (d_module, d_module)), "./Layer/data/FFN_W11.dat")
+    write(np.random.uniform(-.1, .1, (d_module, d_module)), "./Layer/data/FFN_W12.dat")
+    write(np.random.uniform(-.1, .1, (d_module, d_module)), "./Layer/data/FFN_W21.dat")
+    write(np.random.uniform(-.1, .1, (d_module, d_module)), "./Layer/data/FFN_W22.dat")
+    write(np.random.uniform(-.1, .1, (1, d_module)), "./Layer/data/FFN_b11.dat")
+    write(np.random.uniform(-.1, .1, (1, d_module)), "./Layer/data/FFN_b12.dat")
+    write(np.random.uniform(-.1, .1, (1, d_module)), "./Layer/data/FFN_b21.dat")
+    write(np.random.uniform(-.1, .1, (1, d_module)), "./Layer/data/FFN_b22.dat")
+    write(np.random.uniform(-.1, .1, (batch_size, inp_seq_length)), "./Layer/input.dat")
     
