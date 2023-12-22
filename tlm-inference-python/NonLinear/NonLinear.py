@@ -1,6 +1,3 @@
-import sys
-sys.path.append("/root/TLM-inference/tlm-inference-python")
-
 import math
 import numpy as np
 
@@ -10,11 +7,10 @@ from Linear.Mult import Mult
 from role import *
 import Configs.communication as config
 
-
-
 def show1(x):
     for i in x:
-        print(i)
+        print(i, end=" ")
+    print()
 
 def show(x):
     for i in x:
@@ -89,6 +85,15 @@ class NonLinear:
             inverse = tmp1
         return inverse
     
+    def layerNorm(self, x, a, b, c, gamma=1, beta=0, iter: int=10):
+        avg = x.sum() / len(x)
+        sigma = x - avg
+        var_ = self._mult.vector_multipication(sigma, sigma, a, b, c)
+        var = var_.sum() / len(var_)
+        inverse_var = self.inverse_square(var, a, b, c, iter)
+        norm = self._mult.vector_multipication(sigma, inverse_var, a, b, c)
+        return norm * gamma + beta
+        
     def softmax(self, x, rand1, rand2):
         rand = famefrac(np.random.uniform(0, 1))
         exp_x = []
@@ -110,7 +115,7 @@ class NonLinear:
             send(sum_, port=config.default_port_2)
         return exp_x_addshare / (sum_ + sum_remote)
     
-    def gelu(self, x, rand1, rand2, a, b, c):
+    def gelu(self, x, a, b, c, rand1, rand2):
         x2 = self._mult.vector_multipication(x, x, a, b, c)
         x3 = self._mult.vector_multipication(x, x2, a, b, c)
         alpha =  (x + x3 * 0.0044715) * famcfrac(math.sqrt(2. / math.pi) * 2)
@@ -153,8 +158,22 @@ def real_gelu(x):
     beta = (exp_alpha - 1) / (exp_alpha + 1) + 1
     return beta * x * .5
 
+def real_layerNorm(x):
+    avg = x.sum() / len(x)
+    sigma = x - avg
+    var_ = sigma * sigma
+    var = sum(var_) / len(var_)
+    inverse_var = 1. / math.sqrt(var)
+    return sigma * inverse_var
+
+def real_inverse_square(x):
+    result = []
+    for i in x:
+        result.append(1 / math.sqrt(i))
+    return np.asarray(result, dtype=object)
+
 if __name__ == "__main__":
-    dim = 3
+    dim = 4
     mask = gen_mask(2, 2)
     x = []
     for j in range(dim):
@@ -189,12 +208,36 @@ if __name__ == "__main__":
     #     res = non_linear.gelu(x, mask[0][1], mask[1][1], 1, 1, 2)
     #     remote_x, res_remote = recv()
     #     show1(res + res_remote - real_gelu(x + remote_x))
-    x = famcfrac(np.random.uniform(0, 2))
-    if (party == Alice):
-        res = non_linear.inverse_square(x, 1, 1, 2)
-        send((x, res))
-    else:
-        res = non_linear.inverse_square(x, 1, 1, 2)
-        remote_x, res_remote = recv()
-        print((res + res_remote - 1 / (math.sqrt(x + remote_x))) * 10 ** 13)
+    # x = famcfrac(np.random.uniform(0, 2))
+    # if (party == Alice):
+    #     res = non_linear.inverse_square(x, 1, 1, 2)
+    #     send((x, res))
+    # else:
+    #     res = non_linear.inverse_square(x, 1, 1, 2)
+    #     remote_x, res_remote = recv()
+    #     print((res + res_remote - 1 / (math.sqrt(x + remote_x))) * 10 ** 13)avg = x.sum() / len(x)
+    avg = x.sum() / len(x)
+    sigma = x - avg
+    var_ = sigma * sigma
+    var = sum(var_) / len(var_)
+    non_linear.inverse_square(var, 1, 1, 2)
+    # if (party == Alice):
+    #     res_iq = non_linear.inverse_square(var, 1, 1, 2)
+    #     res_ln = non_linear.layerNorm(x, 1, 1, 2)
+    #     send((x, res_ln, var, res_iq))
+    # else:
+    #     res_iq = non_linear.inverse_square(var, 1, 1, 2)
+    #     res_ln = non_linear.layerNorm(x, 1, 1, 2)
+    #     remote_x, res_remote_ln, var_remote, res_remote_iq= recv()
+    #     print(var_remote + var)
+    #     print(var_remote, var)
+    #     print(res_iq + res_remote_iq)
+    #     print(res_iq + res_remote_iq - 1. / math.sqrt(var + var_remote))
+    #     print()
+        
+    #     show1(remote_x + x)
+    #     show1(remote_x)
+    #     show1(x)
+    #     show1(res_ln + res_remote_ln)
+    #     show1(res_ln + res_remote_ln - real_layerNorm(x + remote_x))
     

@@ -1,9 +1,7 @@
-import sys
-sys.path.append("/root/TLM-inference/tlm-inference-python")
-
-import time
 import numpy as np
+
 from Communication.api import *
+from Configs.constant import *
 from role import *
 import Configs.communication as config
 
@@ -55,23 +53,34 @@ class Mult:
             send((s, t), port=config.default_port_2,)
             dim1, _ = s.shape
             dim2, _ = t.shape
-            z = np.zeros((dim1, dim2))
+            z = []
             for i in range(dim1):
+                tmp = []
                 for j in range(dim2):
-                    z[i][j] = s[i].dot(b) + t[j].dot(a) + c * _
-            return z
+                    # z[i][j] = s[i] * b + t[j] * a + c * _
+                    tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + c * _))
+                z.append(tmp)
+            return np.asarray(z, dtype=object)
         s_remote, t_remote = recv(port=config.default_port_2)
         s = s_remote
         t = t_remote
         dim1, _ = s.shape
         dim2, _ = t.shape
-        z = np.zeros((dim1, dim2))
+        z = []
         for i in range(dim1):
+            tmp = []
             for j in range(dim2):
-                z[i][j] = s[i].dot(b) + t[j].dot(a) + c * _ + s[i].dot(t[j])
-        return z
+                # z[i][j] = s[i].dot(b) + t[j].dot(a) + c * _ + s[i].dot(t[j])
+                tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + c * _ + s[i].dot(t[j])))
+            z.append(tmp)
+        return np.asarray(z, dtype=object)
         
-    
+def show(x):
+    for i in x:
+        for j in i:
+            print(j, end=" ")
+        print()
+
 if __name__ == "__main__":
     famcfrac = FXfamily(64)
     dim1, dim2, dim3 = 2, 2, 2
@@ -85,13 +94,19 @@ if __name__ == "__main__":
     for i in range(dim2):
         tmp = []
         for j in range(dim3):
-            tmp.append(famcfrac(0))
+            tmp.append(famcfrac(np.random.uniform(-1, 1)))
         y.append(tmp)
-    a = [famcfrac(1.) for _ in range(dim2)]
-    b = [famcfrac(1.) for _ in range(dim2)]
-    c = famcfrac(dim2 / 2.)
+    a = [1, 1]
+    b = [1, 1]
+    c = 2
     x, y, a, b = np.asarray(x, dtype=object), np.asarray(y, dtype=object), np.asarray(a, dtype=object), np.asarray(b, dtype=object)
-    mul = Mult(int(sys.argv[1]))
+    party = int(sys.argv[1])
+    mul = Mult(party)
     
     z = mul.matrix_multipication(x, y, a, b, c)
+    if party == Alice:
+        send((x, y, z))
+    else:
+        x_remote, y_remote, z_remote = recv()
+        show(z + z_remote - (x + x_remote).dot(y + y_remote))
     
