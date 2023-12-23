@@ -58,7 +58,7 @@ class Mult:
                 tmp = []
                 for j in range(dim2):
                     # z[i][j] = s[i] * b + t[j] * a + c * _
-                    tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + c * _))
+                    tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + sum(c)))
                 z.append(tmp)
             return np.asarray(z, dtype=object)
         s_remote, t_remote = recv(port=config.default_port_2 + port_offset)
@@ -71,7 +71,7 @@ class Mult:
             tmp = []
             for j in range(dim2):
                 # z[i][j] = s[i].dot(b) + t[j].dot(a) + c * _ + s[i].dot(t[j])
-                tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + c * _ + s[i].dot(t[j])))
+                tmp.append(famcfrac(sum(s[i] * b) + sum(t[j] * a) + sum(c) + s[i].dot(t[j])))
             z.append(tmp)
         return np.asarray(z, dtype=object)
         

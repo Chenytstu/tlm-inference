@@ -8,6 +8,7 @@ from role import Alice, Bob
 
 import numpy as np
 
+
 def load_mat(path: str):
     data = []
     with open(path, 'r', encoding="utf-8") as f:
@@ -15,7 +16,7 @@ def load_mat(path: str):
             tmp = []
             for j in i[:-2].split(" "):
                 tmp.append(famefrac(float(j)))
-            data.append(tmp)
+            data.append(np.asarray(tmp, dtype=object))
     return np.asarray(data, dtype=object)
                 
 def load_parm(path: str):
@@ -24,6 +25,7 @@ def load_parm(path: str):
         for i in f.readlines():
             data.append(famefrac(float(i)))
     return np.asarray(data, dtype=object)
+
 
 class Layer:
     def __init__(self, party) -> None:

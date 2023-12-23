@@ -17,9 +17,9 @@ class DecoderLayer(Layer):
         # self.attn = [Attention(self.party, port_offset=i * step) for i in range(head)]
         # self.ln2 = LayerNorm(self.party, port_offset=head * step)
         # self.ffn = FFN(self.party, port_offset=(head + 1) * step)
-        self.ln1 = LayerNorm(self.party)
+        self.ln1 = LayerNorm(self.party, layer=1)
         self.attn = [Attention(self.party) for _ in range(head)]
-        self.ln2 = LayerNorm(self.party)
+        self.ln2 = LayerNorm(self.party, layer=1)
         self.ffn = FFN(self.party)
         
         

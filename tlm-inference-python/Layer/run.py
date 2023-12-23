@@ -16,6 +16,6 @@ if __name__ == "__main__":
     end = time.time() - start
     print("parm loaded, time:", end)
     _forward = layer.forward(inp)
-    # print(_forward.shape)
+    print(inp_seq_length)
     # show(_forward)
     
