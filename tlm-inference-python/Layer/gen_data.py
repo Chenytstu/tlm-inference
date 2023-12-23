@@ -59,11 +59,5 @@ if __name__ == "__main__":
     bv = []
     for i in size:
         bv.append(beaver(i))
-    write((bv[0][0], bv[0][1], bv[0][2]),  "./Layer/data/LayerNorm_beaver11.dat")
-    write((bv[0][3], bv[0][4], bv[0][5]),  "./Layer/data/LayerNorm_beaver12.dat")
-    size = [1]
-    bv = []
-    for i in size:
-        bv.append(beaver(i))
-    write((bv[0][0], bv[0][1], bv[0][2]),  "./Layer/data/LayerNorm_beaver21.dat")
-    write((bv[0][3], bv[0][4], bv[0][5]),  "./Layer/data/LayerNorm_beaver22.dat")
+    write((bv[0][0], bv[0][1], bv[0][2]),  "./Layer/data/LayerNorm_beaver1.dat")
+    write((bv[0][3], bv[0][4], bv[0][5]),  "./Layer/data/LayerNorm_beaver2.dat")
