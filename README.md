@@ -53,6 +53,6 @@ To run secure inference on networks:
 
 This library includes code from the following external repositories:
 
- - [EIGEN3][https://gitlab.com/libeigen/eigen/tree/603e213d13311af286c8c1abd4ea14a8bd3d204e] for matrix computes.
+ - [EIGEN3](https://gitlab.com/libeigen/eigen/tree/603e213d13311af286c8c1abd4ea14a8bd3d204e) for matrix computes.
  - [Microsoft/SEAL](https://github.com/Microsoft/SEAL/tree/1d5c8169aa5aca9deb75c4079e53ea8d5e94007d) for cryptographic tools.
  - [EzPC/SCI](https://github.com/mpc-msri/EzPC/tree/master/SCI) for Framework building.
